@@ -1,0 +1,64 @@
+<project name="WikiStuff" default="deploy">
+
+	<property file="build.properties" /> <!-- defines ${webservice.dir} -->
+	
+	<property name="src.dir" value="lu/intrasoft/jspwiki/plugin"/>
+	<property name="tgt.dir" value="."/>
+    <property name="lib.dir" value="${webserver.dir}/common/lib"/>
+	<property name="wiki.dir" value="${webserver.dir}/webapps/JSPWiki" />
+	<property name="wiki.lib.dir" value="${wiki.dir}/WEB-INF/lib" />
+	
+    <path id="classpath">
+        <fileset dir="${lib.dir}">
+            <include name="**/log4j-1.2.13.jar"/>
+        </fileset>
+    	<fileset dir="${wiki.lib.dir}">
+            <include name="**/JSPWiki.jar"/>
+        </fileset>
+    </path>
+        	
+    <target name="compile">
+        <javac srcdir="${src.dir}"
+               destdir="${tgt.dir}"
+               debug="on"
+               deprecation="ignore"
+               optimize="off">
+            <classpath refid="classpath"/>
+        </javac>
+    </target>
+	
+	
+    <target name="colorcode-plugin-jar" depends="compile">
+		<jar destfile="${tgt.dir}/colorcode-plugin.jar"
+    	     basedir="${tgt.dir}"
+    	     includes="**/ColorCode*.class,**/SyntaxTokenizer.class"
+    	 />
+    </target>
+	
+    <target name="cvsview-plugin-jar" depends="compile">
+		<jar destfile="${tgt.dir}/cvsview-plugin.jar"
+    	     basedir="${tgt.dir}"
+    	     includes="**/CVS*.class"
+    	 />
+    </target>
+	
+	<target name="src-jar">
+		<jar destfile="${tgt.dir}/colorcode-plugin-src.jar"
+    	     basedir="${tgt.dir}"
+    	     includes="**/ColorCode*.java,**/SyntaxTokenizer.java,build.xml,**/*.properties"
+    	 />
+		<jar destfile="${tgt.dir}/cvsview-plugin-src.jar"
+    	     basedir="${tgt.dir}"
+    	     includes="**/CVS*.java,build.xml"
+    	 />
+	</target>
+
+	<target name="deploy" depends="colorcode-plugin-jar,cvsview-plugin-jar">
+		<copy todir="${wiki.lib.dir}" file="${tgt.dir}/colorcode-plugin.jar" />
+		<copy todir="${wiki.lib.dir}" file="${tgt.dir}/cvsview-plugin.jar" />
+        <copy todir="${wiki.dir}/WEB-INF/classes">
+            <fileset dir="${src.dir}" includes="**/*.properties" />
+        </copy>
+	</target>
+	
+</project>
